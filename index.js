@@ -19,6 +19,10 @@ app.get('/', (req, res) => {
     res.status(200).json({ message: 'WORKasdsadasdd!!!' })
 })
 
+app.get('/hello', (req, res) => {
+    res.status(200).json({ message: 'Hello World!!!' })
+})
+
 
 const start = async () => {
     try {

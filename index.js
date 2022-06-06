@@ -13,7 +13,7 @@ const app = express()
 app.use(express.json())
 // app.use('/api', router)
 
-app.use(errorHandler)
+// app.use(errorHandler)
 
 app.get('/', (req, res) => {
     res.status(200).json({ message: 'WORKasdsadasdd!!!' })

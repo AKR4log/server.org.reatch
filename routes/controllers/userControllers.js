@@ -12,7 +12,7 @@ const generationJwt = (id, email, role) => {
 class UserController {
   async register(req, res, next) {
     try {
-      const { email, password, role, username, photo, phone } = req.body;
+      const { email, password, role, username, photo, phone,name } = req.body;
       if (!email || !password) {
         return next(ApiError.badRequest("Not a complete request"));
       }
@@ -25,6 +25,10 @@ class UserController {
         email,
         role,
         password: hashPassword,
+        username: username,
+        photo: photo,
+        phone: phone,
+        name: name
       });
       const token = generationJwt(user.id, user.email, user.role);
       return res.json({ token });
@@ -73,81 +77,54 @@ class UserController {
       const updatePassword = await models.users.update(hashPassword, {
         where: { email: email },
       });
-      return res.json({ updatePassword });
+      return res.status(200).send(updatePassword);
     } catch (err) {
       return ApiError.badRequest("Error: " + err);
     }
   }
 
-  async updateName(req, res, next) {
+  async subscribe(req, res, next) {
     try {
-      const { email, newName } = req.body;
-      const user = await models.users.findOne({ where: { email } });
-      if (!user) {
-        return ApiError.badRequest("Request returned empty");
-      }
-      const updateName = await models.users.update(newName, {
-        where: { email: email },
-      });
-      return res.json({ updateName });
-    } catch (err) {
-      return ApiError.badRequest("Error: " + err);
+      const { idolUsername, subUsername } = req.body;
+      const idol = await models.users.findOne({ where: { username: idolUsername } });
+      const subscriber = await models.users.findOne({ where: { username: subUsername } });
+      idol.addSubscribe(subscriber);
+      return res.status(200).send(idol);
+    }
+    catch(err){
+      console.log(err);
     }
   }
-  async updateEmail(req, res, next) {
+
+  async unSubscribe(req, res, next) {
     try {
-      const { email, newEmail } = req.body;
-      const user = await models.users.findOne({ where: { email } });
-      if (!user) {
-        return ApiError.badRequest("Request returned empty");
-      }
-      const updateEmail = await models.users.update(newEmail, {
-        where: { email: email },
-      });
-      return res.json({ updateEmail });
-    } catch (err) {
-      return ApiError.badRequest("Error: " + err);
+      const { idolUsername, subUsername } = req.body;
+      const idol = await models.users.findOne({ where: { username: idolUsername } });
+      const subscriber = await models.users.findOne({ where: { username: subUsername } });
+      idol.addSubscribe(subscriber);
+      return res.status(200).send(idol);
+    }
+    catch(err){
+      console.log(err);
     }
   }
 
-  async get(req, res, next) {
-    models.users
-      .findAll({
-        include: [
-          {
-            model: models.user_details,
-            as: "user_details",
-          },
-        ],
-      })
-      .then((users) => {
-        res.status(200).send(users);
-      });
+  async getSubscribers(req, res, next){
+    try{
+      const { idolUsername } = req.body;
+      const idol = await models.users.findOne({ where: { username: idolUsername }});
+      return res.status(200).send(await idol.getSubscribe());
+    }catch(err){console.log(err);}
   }
 
-  async create(req, res, next) {
-    models.users.create(
-      {
-        name: req.body.name,
-        username: req.body.username,
-        photo: req.body.photo,
-        phone: req.body.phone,
-        email: req.body.email,
-        password: req.body.password,
-        user_details: {
-          verification: req.body.verification,
-          bio: req.body.bio,
-        },
-      },
-      {
-        include: {
-          model: models.user_details,
-          as: "user_details",
-        },
-      }
-    );
-    res.status(200).send("user");
+  async getSubscriptions(req, res, next){
+    try{
+      const { subUsername } = req.body;
+      const subscriber = await models.users.findOne({ where: { username: subUsername }});
+      return res.status(200).send(await subscriber.getBackSubscribe());
+    }catch(err){console.log(err);}
   }
+
 }
 
 module.exports = new UserController();

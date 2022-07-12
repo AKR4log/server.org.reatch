@@ -19,12 +19,16 @@ const users = (db, DataTypes, options) => {
     { ...other, paranoid: false, timestamps: false }
   );
   model.associate = function (models) {
+
     model.hasOne(models.user_details, {
-      foriegnKey: {
+      foreignKey: {
         type: DataTypes.UUID,
         allowNull: false,
       },
     });
+
+    model.belongsToMany(model, {as: 'Subscribe', foreignKey: "idolId", through: "subscriptions"});
+    model.belongsToMany(model, {as: 'BackSubscribe', foreignKey: "subscriberId", through: "subscriptions"});
   };
 
   return model;

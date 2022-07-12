@@ -10,7 +10,7 @@ const dev = {
   port: process.env.DEV_POST,
   dialect: process.env.DEV_DIALECT,
   logging: (msg) => {},
-  define: { timestamps: false },
+  define: { timestamps: true },
 };
 
 module.exports = { development: dev, test: null, production: null };
